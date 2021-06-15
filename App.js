@@ -33,7 +33,7 @@ function LoginScreen({ navigation }) {
       <TextInput
         style={styles.textInput}
         onChangeText={(text) => setUserID(text)} /* callback when text box update */
-        placeholder='User ID'
+        placeholder='User ID (default 001)'
         keyboardType='numeric'
       />
       <Button

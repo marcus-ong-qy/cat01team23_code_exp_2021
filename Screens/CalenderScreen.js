@@ -52,9 +52,6 @@ function CalenderSelect({navigation}) {
   )
 }
 
-
-
-
 function TimetableSelect({route}) {
   const {year, month, day, timestamp, dateString} = route.params
 

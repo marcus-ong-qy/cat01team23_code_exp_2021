@@ -44,7 +44,7 @@ export default function EmployeeApp({ route, navigation }) {
         <Tab.Screen name="Home">
           {props => <HomeScreen {...props} userID={route.params.userID}/>}
         </Tab.Screen>
-        <Tab.Screen name="Calender" component={CalenderScreen} />
+        <Tab.Screen name="Calender" component={SettingsScreen} />
         <Tab.Screen name="Settings" component={SettingsScreen} />
 
       </Tab.Navigator>

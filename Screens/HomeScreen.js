@@ -57,6 +57,8 @@ export default function HomeScreen({ userID }) {
 
   const idFound = nominalList[userID]? true:false
 
+  if (!idFound) userID = "001"
+
   const [isInOffice, setIsInOffice] = useState(idFound? nominalList[userID]['isInOffice']:false);
 
   function checkInButton() {
@@ -79,14 +81,17 @@ export default function HomeScreen({ userID }) {
       <Card>
         <Text style={styles.dateTime}> { currentdate } </Text>
 
-        <Text style={styles.idName}> { idFound? nominalList[userID]['id']: 'nil' }: { idFound? nominalList[userID]['name']: 'nil' } </Text>
+        <Text style={styles.idName}> { nominalList[userID]['id'] }: { nominalList[userID]['name'] } </Text>
 
-        <Text style={styles.schedule}> Schedule: { idFound? nominalList[userID]['wfh']? 'Work From Home':'Report To Office' : 'nil' } </Text>
+        <Text style={styles.schedule}> Schedule: { nominalList[userID]['wfh']? 'Work From Home':'Report To Office' } </Text>
 
         <Text style={styles.paragraph}> Status: </Text>
-        <Text style={styles.status}> { idFound? isInOffice? 'OFFICE':'HOME' : 'nil' } </Text>
+        <Text style={styles.status}> { isInOffice? 'OFFICE':'HOME' } </Text>
         
-        <Text style={styles.cohort}> Cohort: { idFound? nominalList[userID]['cohort']: 'nil' } </Text>
+        <Text style={styles.cohort}> Cohort: { nominalList[userID]['cohort'] } </Text>
+      </Card>
+      <Card>
+        <Text style={styles.dateTime}> { currentdate } </Text>
       </Card>
 
       {checkInButton()}
