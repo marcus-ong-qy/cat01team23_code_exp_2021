@@ -1,6 +1,5 @@
 
 import React, { useState , useEffect} from 'react'
-import DatePicker from 'react-native-date-picker'
 import {
   FlatList,
   StyleSheet,
@@ -18,46 +17,54 @@ import firebase from "../database/firebaseDB";
 
 const db = firebase.firestore().collection("timetable");
 
-async function loadAppointmentData() {
-  setLoad(true)
-
-
-  setLoad(false)
-  setDisplayTime(busData.next.time)
-  console.log(busData.next.time)
-  }
-
-export default function CalenderScreen() {
+export default function CalenderScreen({navigation, route}) {
   //firebase
-  const [appointmentDate, setAppointmentDate] = useState(new Date());
   const [hasAppointment, setHasAppointment] = useState(0);
+  const [appointmentBooked, setAppointmentBooked] = useState(0);
   const [timetable, setTimetable] = useState([]);
 
+  const [helptext, setHelptext] = useState(" ");
   
   // Load Firebase data on start
   //alt methods
+
   useEffect(() => {
-    fetchTimetable();
+    updateText();
   }, [])
 
   const fetchTimetable=async()=>{
+
     const data=await db.get();
     data.docs.forEach(item=>{
-     setTimetable([...timetable,item.data()])
+      
+      var date2 = new Date(item.data.appointmentDate);
+      if(date2 - date < 3600000 || date - date2 < 3600000)
+      {
+        alert(1)
+        setAppointmentBooked(true);
+      }
+      else
+      {
+
+        setAppointmentBooked(false);
+        //setTimetable([...timetable,item.data()])
+        uploadData()
+        setHasAppointment(true);
+      }
+     
     })
+
+    updateText()
   }
 
   function uploadData()
   {
-    alert(timetable[0].appointmenHH)
     const newNote = {
-      appointmenHH: date.getHours(),
-      appointmentDD: date.getDay(),
-      appointmentMM: date.getMonth(), 
-      appointmentMin: date.getMinutes(), 
+      appointmentDate : date.getTime(),
       userId: 1,
     };
     db.add(newNote);
+    updateText()
   }
   //firebase end
 
@@ -71,8 +78,7 @@ export default function CalenderScreen() {
     const currentDate = selectedDate || date;
     setShow(Platform.OS === 'ios');
     setDate(currentDate);
-    setAppointmentDate(date)
-    uploadData()
+    fetchTimetable()
   };
 
   const showMode = (currentMode) => {
@@ -90,10 +96,25 @@ export default function CalenderScreen() {
   //calendar settings end
 
 
+  function updateText(){
+    if(hasAppointment)
+    {
+      setHelptext("Appointment good to go")
+    }
+    else if(appointmentBooked)
+    {
+      setHelptext("Looks like the slot is taken, ")
+    }
+    else{
+      setHelptext("Looks like you have No Appointment booked, ")
+    }
+  }
+
+
   return (
     <View style={styles.container}>
-      <Text>{hasAppointment? appointmentDate.toString() : ""}</Text>
-      <Text>{hasAppointment? "Appointment good to go": "Looks like you have No Appointment booked, "}</Text>
+      <Text style = {styles.paragraph}>{hasAppointment? date.toString() : ""}</Text>
+      <Text>{helptext}</Text>
       <Text>{hasAppointment? " " : "We have automatically booked a slot for you, is it okay? "}</Text>
       <Button onPress={showDatepicker} title="Customise Date" />
       <Button onPress={showTimepicker} title="Customise Time" />
