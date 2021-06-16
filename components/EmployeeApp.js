@@ -4,7 +4,6 @@ import Constants from 'expo-constants';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { FontAwesome } from "@expo/vector-icons";
-import { Card } from 'react-native-paper';
 import nominalList from './NominalList.js' // explore using json or a database
 import CalenderScreen from '../Screens/CalenderScreen'
 import HomeScreen from '../Screens/HomeScreen'
@@ -13,8 +12,6 @@ import SettingsScreen from '../Screens/SettingScreen'
 const Tab = createBottomTabNavigator();
 
 export default function EmployeeApp({ route, navigation }) {
-  console.log(route.params.userID)
-  
   return (
       <Tab.Navigator independent = {true}
         screenOptions={({ route }) => ({
@@ -44,7 +41,9 @@ export default function EmployeeApp({ route, navigation }) {
         <Tab.Screen name="Home">
           {props => <HomeScreen {...props} userID={route.params.userID}/>}
         </Tab.Screen>
-        <Tab.Screen name="Calender" component={CalenderScreen} />
+        <Tab.Screen name="Calender">
+          {props => <CalenderScreen {...props} userID={route.params.userID}/>}
+        </Tab.Screen>
         <Tab.Screen name="Settings" component={SettingsScreen} />
 
       </Tab.Navigator>

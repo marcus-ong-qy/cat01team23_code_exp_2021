@@ -1,19 +1,71 @@
 import * as React from 'react';
 import { useEffect, useState } from "react";
-import { Text, View, StyleSheet, Button } from 'react-native';
+import { Text, View, StyleSheet, Button, Pressable } from 'react-native';
 import Constants from 'expo-constants';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { FontAwesome } from "@expo/vector-icons";
+import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { Card } from 'react-native-paper';
+import Checkbox from 'rc-checkbox';
+import { useChecklist } from 'react-checklist';
 
-import { nominalList } from '../components/NominalList.js' // explore using json or a database
+import { nominalList } from '../components/NominalList.js'; // explore using json or a database
+
+// List of questions
+const questions = [`severe difficulty breathing (e.g., struggling for each breath, speaking in single words)`,
+          `severe chest pain`,
+          `having a very hard time waking up`,
+          `feeling confused`,
+          `lost consciousness`,
+          `fever`,
+          `new onset of cough or worsening of chronic cough`,
+          `new or worsening shortness of breath`,
+          `new or worsening difficulty breathing`,
+          `sore throat`,
+          `runny nose`]
+
+var data = [];
+
+function genData(value, index, array) {
+  data.push({ _id: index+1, label: value })
+}
+
+questions.forEach(genData);
+
+console.log(data)
+
+// const data = [
+//     { _id: 1, label: questions[0] },
+//     { _id: 2, label: questions[1] },
+//   ]
+
+function CheckList(data) {
+    const { handleCheck, isCheckedAll, checkedItems } = useChecklist(data, {
+      key: '_id',
+      keyType: 'number',
+    });
+
+    console.log(checkedItems.size)
+
+    return (
+      <ul>
+        {data.map((v, i) => (
+          <li key={i}>
+            <input
+              type="checkbox"
+              data-key={v._id}                  // 3
+              onChange={handleCheck}            // 4
+              checked={checkedItems.has(v._id)} // 5
+            />
+            <label>{v.label}</label>
+          </li>
+        ))}
+      </ul>
+    );
+  }
 
 
-
-export default function HomeScreen({ userID }) {
-
-  function timeNow() {
+function timeNow() {
     var myDate = new Date();
 
     let daysList = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -55,84 +107,56 @@ export default function HomeScreen({ userID }) {
     return `${today} ${currentTime}`
   }
 
-  const idFound = nominalList[userID]? true:false
+function submitChecklist() {} // when user presses submit button
 
-  if (!idFound) userID = "001"
+export default function HomeScreen({ userID }) {
 
-  const [isInOffice, setIsInOffice] = useState(idFound? nominalList[userID]['isInOffice']:false);
+  const [severity, setSeverity] = useState(0);
+  const [disabled1, setDisabled1] = useState(false);
+  const [disabled2, setDisabled2] = useState(false);
+  var currentdate = timeNow();
 
-  function checkInButton() {
-    if (!nominalList[userID]['wfh'])
-    return (
-      <Button 
-        title='Check-in to Workplace' 
-        onPress={ () => { 
-          nominalList[userID]['isInOffice'] = !nominalList[userID]['isInOffice'];
-          setIsInOffice(!isInOffice)
-        }}
-      />
-    )
-  }
+  const { handleCheck, isCheckedAll, checkedItems } = useChecklist(data, {
+  key: '_id',
+  keyType: 'number',
+  });
 
-  var currentdate = timeNow()  //todo make this self updating
+  const [checkCounter, setCheckCounter] = useState(0);
+  var Checklist = CheckList(data)
+
+  
 
   return (
     <View style={styles.container}>
       <Card>
-        <Text style={styles.dateTime}> { currentdate } </Text>
-
-        <Text style={styles.idName}> { nominalList[userID]['id'] }: { nominalList[userID]['name'] } </Text>
-
-        <Text style={styles.schedule}> Schedule: { nominalList[userID]['wfh']? 'Work From Home':'Report To Office' } </Text>
-
-        <Text style={styles.paragraph}> Status: </Text>
-        <Text style={styles.status}> { isInOffice? 'OFFICE':'HOME' } </Text>
-        
-        <Text style={styles.cohort}> Cohort: { nominalList[userID]['cohort'] } </Text>
+        <Text style={styles.paragraph}> { currentdate } </Text>
+        <Text style={styles.username}> Welcome user! </Text>  
       </Card>
+
+    <View style={{height: 20}}/>
+
       <Card>
-        <Text style={styles.dateTime}> { currentdate } </Text>
+        <Text style={styles.paragraph2}> Kindly fill up questionaire to proceed </Text>
+        <Text> In the past 10 days, have you experienced any of the following: </Text>
+        {Checklist}
+        <Text> {checkCounter} </Text>
       </Card>
 
-      {checkInButton()}
+    <View style={{height: 5}}/>
 
+      <Button
+        onPress={ submitChecklist }
+        title="Submit"
+      />
     </View>
-  )
+  );
 }
 
+
 const styles = StyleSheet.create({
-  dateTime: {
+  username: {
     margin: 12,
     fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  idName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  paragraph: {
-    margin: 12,
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  status: {
-    // margin: 24,
-    fontSize: 48,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  schedule: {
-    margin: 12,
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  cohort: {
-    margin: 12,
-    fontSize: 22,
     fontWeight: 'bold',
     textAlign: 'center',
   },
@@ -142,5 +166,16 @@ const styles = StyleSheet.create({
     paddingTop: Constants.statusBarHeight,
     backgroundColor: '#ecf0f1',
     padding: 8,
+  },
+  paragraph: {
+    margin: 12,
+    fontSize: 12,
+    textAlign: 'center',
+  },
+  paragraph2: {
+    margin: 12,
+    fontSize: 14,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });

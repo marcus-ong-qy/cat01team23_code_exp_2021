@@ -17,11 +17,12 @@ import firebase from "../database/firebaseDB";
 
 const db = firebase.firestore().collection("timetable");
 
-export default function CalenderScreen({navigation, route}) {
+export default function CalenderScreen({userID}) {
   //firebase
   const [hasAppointment, setHasAppointment] = useState(0);
   const [appointmentBooked, setAppointmentBooked] = useState(0);
   const [timetable, setTimetable] = useState([]);
+  const [count, setCount] = useState(7)
 
   const [helptext, setHelptext] = useState(" ");
   
@@ -29,42 +30,57 @@ export default function CalenderScreen({navigation, route}) {
   //alt methods
 
   useEffect(() => {
-    updateText();
+    fetchTimetable();
   }, [])
 
   const fetchTimetable=async()=>{
 
+    console.log("fetchTimetable " + userID + " " + date)
     const data=await db.get();
     data.docs.forEach(item=>{
       
-      var date2 = new Date(item.data.appointmentDate);
-      if(date2 - date < 3600000 || date - date2 < 3600000)
-      {
-        alert(1)
-        setAppointmentBooked(true);
-      }
-      else
-      {
+      // console.log("test1 ")
+      // var date2 = item._delegate._document.data.value.mapValue.fields.appointmentDate.integerValue
+      // var itemid = item._delegate._document.data.value.mapValue.fields.id.integerValue
+      // console.log("item id " + itemid + "userId " + userID)
 
-        setAppointmentBooked(false);
-        //setTimetable([...timetable,item.data()])
-        uploadData()
+      if(itemid == userID)
+      {
+        console.log("test2 ")
         setHasAppointment(true);
+        // date = item._delegate._document.data.value.mapValue.fields.id.integerValue
+        // console.log("date " + date)
       }
-     
-    })
 
-    updateText()
+      // if(date2 - date < 3600000 || date - date2 < 3600000)
+      // {
+      //   console.log("test3 ")
+      //   console.log(date2)
+      //   setCount(count + 1)
+      //   setAppointmentBooked(true);
+      //   setDate(date + 3600000)
+      //   setHasAppointment(true);
+      // }
+      // else
+      // {
+      //   setAppointmentBooked(false);
+      //   uploadData()
+      //   setHasAppointment(true);
+      // }
+    })
   }
 
   function uploadData()
   {
+    setHasAppointment(true)
+    console.log("uploadData " + userID + " " + date)
     const newNote = {
       appointmentDate : date.getTime(),
-      userId: 1,
+      id: userID,
     };
     db.add(newNote);
     updateText()
+    setCount(couunt + 1)
   }
   //firebase end
 
@@ -78,7 +94,8 @@ export default function CalenderScreen({navigation, route}) {
     const currentDate = selectedDate || date;
     setShow(Platform.OS === 'ios');
     setDate(currentDate);
-    fetchTimetable()
+    uploadData()
+    setHasAppointment(true);
   };
 
   const showMode = (currentMode) => {
@@ -95,7 +112,6 @@ export default function CalenderScreen({navigation, route}) {
   };
   //calendar settings end
 
-
   function updateText(){
     if(hasAppointment)
     {
@@ -105,7 +121,7 @@ export default function CalenderScreen({navigation, route}) {
     {
       setHelptext("Looks like the slot is taken, ")
     }
-    else{
+    else if(hasAppointment == false){
       setHelptext("Looks like you have No Appointment booked, ")
     }
   }
@@ -113,9 +129,10 @@ export default function CalenderScreen({navigation, route}) {
 
   return (
     <View style={styles.container}>
-      <Text style = {styles.paragraph}>{hasAppointment? date.toString() : ""}</Text>
-      <Text>{helptext}</Text>
-      <Text>{hasAppointment? " " : "We have automatically booked a slot for you, is it okay? "}</Text>
+      <Text style = {{fontSize: 90, textAlign: 'center', color: "green"}}>{count}</Text>
+      <Text style = {styles.paragraph}>Patients Currently in the CODE_EXP Clinic. Safe !</Text>
+      <Text style = {styles.paragraph}>{hasAppointment? date.toLocaleString() : ""}</Text>
+      <Text style = {styles.paragraph}>{helptext}</Text>
       <Button onPress={showDatepicker} title="Customise Date" />
       <Button onPress={showTimepicker} title="Customise Time" />
       {show && (

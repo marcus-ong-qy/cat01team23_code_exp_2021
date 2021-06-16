@@ -33,8 +33,14 @@ function LoginScreen({ navigation }) {
       <TextInput
         style={styles.textInput}
         onChangeText={(text) => setUserID(text)} /* callback when text box update */
-        placeholder='User ID (default 001)'
+        placeholder='User ID (empty to login as guest)'
         keyboardType='numeric'
+      />
+      <TextInput
+        style={styles.textInput}
+        onChangeText={() => {}} /* callback when text box update */
+        placeholder='password'
+        keyboardType='visible-password'
       />
       <Button
         onPress={
@@ -81,3 +87,4 @@ const styles = StyleSheet.create({
     width: "100%",
   },
 });
+
